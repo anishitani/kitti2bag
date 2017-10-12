@@ -27,6 +27,9 @@ from gps_common.msg import GPSFix, GPSStatus
 import numpy as np
 import argparse
 
+from math import pi
+from angles import normalize_angle_positive as normalize
+
 def save_imu_data(bag, kitti, imu_frame_id, topic):
     print("Exporting IMU")
     for timestamp, oxts in zip(kitti.timestamps, kitti.oxts):
@@ -250,12 +253,12 @@ def save_gps_data(bag, kitti, gps_frame_id, topic):
         gpsfix_msg.latitude     = oxts.packet.lat
         gpsfix_msg.longitude    = oxts.packet.lon
         gpsfix_msg.altitude     = oxts.packet.alt
-        gpsfix_msg.track        = 57.3*oxts.packet.yaw
+        gpsfix_msg.track        = (180.0/pi) * normalize(pi/2-oxts.packet.yaw) 
         gpsfix_msg.speed        = \
             math.sqrt( oxts.packet.ve*oxts.packet.ve + oxts.packet.vn*oxts.packet.vn )
         gpsfix_msg.climb        = oxts.packet.vu
-        gpsfix_msg.pitch        = 57.3*oxts.packet.pitch
-        gpsfix_msg.roll         = 57.3*oxts.packet.roll
+        gpsfix_msg.pitch        = (180.0/pi) * oxts.packet.pitch
+        gpsfix_msg.roll         = (180.0/pi) * oxts.packet.roll
         gpsfix_msg.time         = ts
         gpsfix_msg.err_horz     = oxts.packet.pos_accuracy
         gpsfix_msg.err_speed    = oxts.packet.vel_accuracy
